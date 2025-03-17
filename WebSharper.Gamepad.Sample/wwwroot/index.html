@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Gamepad API Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="Content/WebSharper.Gamepad.Sample.css" />
+    <style>
+        /* Don't show the not-yet-loaded templates */
+        [ws-template], [ws-children-template] { display: none; }
+    </style>
+    <script type="module" src="Content/WebSharper.Gamepad.Sample.head.js"></script>
+</head>
+<body>
+    <h1>Gamepad API Example</h1>
+    <div id="main" ws-children-template="Main">
+        <p ws-replace="Status"></p>
+        <p><strong>Button Pressed:</strong> <span ws-replace="Buttons">None</span></p>
+        <p><strong>Left Stick:</strong> X: <span ws-replace="LX">0</span>, Y: <span ws-replace="LY">0</span></p>
+
+    </div>
+    <script type="module" src="Content/WebSharper.Gamepad.Sample.min.js"></script>
+</body>
+</html>

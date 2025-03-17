@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebSharper.Gamepad", "WebSharper.Gamepad\WebSharper.Gamepad.fsproj", "{AF5124EB-0573-4DE8-BD6A-3564A4388850}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebSharper.Gamepad.Sample", "WebSharper.Gamepad.Sample\WebSharper.Gamepad.Sample.fsproj", "{4A813C5A-80CE-4C24-8B30-D8995E26FE56}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF5124EB-0573-4DE8-BD6A-3564A4388850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF5124EB-0573-4DE8-BD6A-3564A4388850}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF5124EB-0573-4DE8-BD6A-3564A4388850}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF5124EB-0573-4DE8-BD6A-3564A4388850}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A813C5A-80CE-4C24-8B30-D8995E26FE56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A813C5A-80CE-4C24-8B30-D8995E26FE56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A813C5A-80CE-4C24-8B30-D8995E26FE56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A813C5A-80CE-4C24-8B30-D8995E26FE56}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9A52EBE-0548-4114-90FD-17397DD7FFBE}
+	EndGlobalSection
+EndGlobal
