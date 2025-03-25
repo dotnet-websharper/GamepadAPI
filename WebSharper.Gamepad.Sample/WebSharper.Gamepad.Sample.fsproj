@@ -11,19 +11,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WebSharper" Version="8.0.0.525-rc2" />    
-    <PackageReference Include="WebSharper.FSharp" Version="8.0.0.525-rc2" />
-    <PackageReference Include="WebSharper.MathJS" Version="8.0.0.525-rc2" />
-    <PackageReference Include="WebSharper.UI" Version="8.0.0.525-rc2" />
-    <PackageReference Include="WebSharper.AspNetCore" Version="8.0.0.525-rc2" />
+    <PackageReference Include="WebSharper" Version="8.0.0.536-rc2" />    
+    <PackageReference Include="WebSharper.FSharp" Version="8.0.0.536-rc2" />
+    <PackageReference Include="WebSharper.MathJS" Version="8.0.0.536-rc2" />
+    <PackageReference Include="WebSharper.UI" Version="8.0.0.536-rc2" />
+    <PackageReference Include="WebSharper.AspNetCore" Version="8.0.0.536-rc2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WebSharper.Gamepad.Extensions\WebSharper.Gamepad.Extensions.fsproj" />
     <ProjectReference Include="..\WebSharper.Gamepad\WebSharper.Gamepad.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="9.0.300-beta.25079.4" />
+    <PackageReference Update="FSharp.Core" Version="9.0.300-beta.25124.4" />
   </ItemGroup>
 
 </Project>

@@ -85,8 +85,7 @@ module Client =
     let rec updateGamepad () =
         match gamepadIndex with
         | Some index ->
-            let navigator = As<Navigator>(JS.Window.Navigator)
-            let gamepads = navigator.GetGamepads()
+            let gamepads = JS.Window.Navigator.GetGamepads()
             let gamepad = gamepads.[index]
 
             if not (isNull gamepad) then

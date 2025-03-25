@@ -85,31 +85,9 @@ module Definition =
             Constructor (T<string>?eventType * !? GamepadEventInit?options)
         ]
 
-    let Navigator =
-        Class "Navigator"
-        |+> Instance [
-            "getGamepads" => T<unit> ^-> !|Gamepad 
-        ]
-
-    let Window = 
-        Class "Window"
-        |+> Instance [
-            "ongamepadconnected" => T<unit> ^-> T<unit> 
-            |> ObsoleteWithMessage "Use OnGamepadConnected instead"
-            "ongamepadconnected" => T<Dom.Event> ^-> T<unit> 
-            |> WithSourceName "OnGamepadConnected"
-
-            "ongamepaddisconnected" => T<unit> ^-> T<unit> 
-            |> ObsoleteWithMessage "Use OnGamepadDisconnected instead"
-            "ongamepaddisconnected" => T<Dom.Event> ^-> T<unit> 
-            |> WithSourceName "OnGamepadDisconnected"
-        ]
-
     let Assembly =
         Assembly [
             Namespace "WebSharper.Gamepad" [
-                Window
-                Navigator
                 GamepadEvent
                 GamepadEventInit
                 Gamepad
