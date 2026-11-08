@@ -1,24 +1,35 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Gamepad API Example</title>
+    <title>WebSharper Gamepad API Demo</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%234f46e5'/%3E%3Crect x='3' y='6' width='10' height='6' rx='3' fill='white'/%3E%3Ccircle cx='5.5' cy='9' r='1' fill='%234f46e5'/%3E%3Ccircle cx='10.5' cy='9' r='1' fill='%234f46e5'/%3E%3C/svg%3E" />
     <link rel="stylesheet" type="text/css" href="Content/WebSharper.Gamepad.Sample.css" />
-    <style>
-        /* Don't show the not-yet-loaded templates */
-        [ws-template], [ws-children-template] { display: none; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="site.css" />
     <script type="module" src="Content/WebSharper.Gamepad.Sample.head.js"></script>
 </head>
 <body>
-    <h1>Gamepad API Example</h1>
-    <div id="main" ws-children-template="Main">
-        <p ws-replace="Status"></p>
-        <p><strong>Button Pressed:</strong> <span ws-replace="Buttons">None</span></p>
-        <p><strong>Left Stick:</strong> X: <span ws-replace="LX">0</span>, Y: <span ws-replace="LY">0</span></p>
+    <main class="page">
+        <header class="hero">
+            <h1>Gamepad API Demo</h1>
+            <p class="lede">
+                Connect a gamepad and press any button to see its live state. The page also listens to the
+                arrow keys and spacebar as a fallback when no gamepad is connected.
+            </p>
+        </header>
 
-    </div>
+        <section class="card">
+            <h2>Live input</h2>
+            <p class="hint">Polled from <code>navigator.getGamepads()</code> on every animation frame.</p>
+            <p class="status" role="status">${status}</p>
+            <dl class="readout">
+                <dt>Buttons</dt><dd>${buttons}</dd>
+                <dt>Left stick</dt><dd>X: ${leftX} &nbsp; Y: ${leftY}</dd>
+                <dt>Triggers</dt><dd>L: ${triggerL} &nbsp; R: ${triggerR}</dd>
+            </dl>
+        </section>
+    </main>
     <script type="module" src="Content/WebSharper.Gamepad.Sample.min.js"></script>
 </body>
 </html>

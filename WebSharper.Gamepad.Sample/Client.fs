@@ -3,102 +3,99 @@
 open WebSharper
 open WebSharper.JavaScript
 open WebSharper.UI
+open WebSharper.UI.Notation
 open WebSharper.UI.Client
 open WebSharper.UI.Templating
 open WebSharper.Gamepad
 
 [<JavaScript>]
 module Client =
-    // The templates are loaded from the DOM, so you just can edit index.html
-    // and refresh your browser, no need to recompile unless you add or remove holes.
+    // The template is loaded from the DOM, so editing index.html and refreshing
+    // the browser is enough; a rebuild is only needed when holes change.
     type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
 
-    let statusMessage = Var.Create "🎮 Press Arrow Keys or Spacebar to simulate a Gamepad!"
-    let buttonPressed = Var.Create "None"
-    let leftStickX = Var.Create "0"
-    let leftStickY = Var.Create "0"
+    let status = Var.Create "Connect a gamepad, or use the arrow keys and spacebar to simulate one."
+    let buttons = Var.Create "None"
+    let leftX = Var.Create "0.00"
+    let leftY = Var.Create "0.00"
+    let triggerL = Var.Create "0.00"
+    let triggerR = Var.Create "0.00"
 
-    let mutable gamepadIndex: int option = None
+    let mutable gamepadIndex : int option = None
 
-    // Function to update gamepad inputs in real-time
+    // Keyboard fallback so the demo works without a physical gamepad.
+    let fakeButtons = Array.create 16 false
+    let fakeAxes = [| 0.0; 0.0 |]
+
+    let buttonName i = sprintf "Button %d" i
+
     let rec updateGamepad () =
+        let pads = JS.Window.Navigator.GetGamepads()
         match gamepadIndex with
-        | Some index ->
-            let gamepads = JS.Window.Navigator.GetGamepads()
-            let gamepad = gamepads.[index]
+        | Some i when i >= 0 && i < pads.Length && not (isNull pads.[i]) ->
+            let gp = pads.[i]
+            let pressed =
+                gp.Buttons
+                |> Array.mapi (fun i b -> if b.Pressed then Some (buttonName i) else None)
+                |> Array.choose id
+            buttons := if pressed.Length > 0 then String.concat ", " pressed else "None"
+            leftX := gp.Axes.[0].ToString("0.00")
+            leftY := gp.Axes.[1].ToString("0.00")
+            triggerL := if gp.Buttons.Length > 6 then gp.Buttons.[6].Value.ToString("0.00") else "0.00"
+            triggerR := if gp.Buttons.Length > 7 then gp.Buttons.[7].Value.ToString("0.00") else "0.00"
+        | _ ->
+            buttons := if fakeButtons.[0] then "Button 0 (Spacebar)" else "None"
+            leftX := fakeAxes.[0].ToString("0.00")
+            leftY := fakeAxes.[1].ToString("0.00")
+            triggerL := "0.00"
+            triggerR := "0.00"
 
-            if not (isNull gamepad) then
-                // Detect which buttons are being pressed
-                let buttons =
-                    gamepad.Buttons
-                    |> Array.mapi (fun i button -> if button.Pressed then Some (sprintf "Button %d" i) else None)
-                    |> Array.choose id
-                    |> fun arr -> if arr.Length > 0 then String.concat ", " arr else "None"
+        // Gamepad input is polled, so keep the readout in sync on every frame.
+        JS.RequestAnimationFrame(fun _ -> updateGamepad ()) |> ignore
 
-                buttonPressed.Value <- buttons
-                leftStickX.Value <- gamepad.Axes.[0].ToString()
-                leftStickY.Value <- gamepad.Axes.[1].ToString()
-
-                // Recursively call updateGamepad on each animation frame
-                JS.RequestAnimationFrame(fun _ -> updateGamepad()) |> ignore
-        | None -> ()
-
-    // Event handler for gamepad connection
     let handleGamepadConnected (event: Dom.Event) =
         let e = As<GamepadEvent> event
         gamepadIndex <- Some e.Gamepad.Index
-        statusMessage.Value <- $"Gamepad Connected: {e.Gamepad.Id}"
-        updateGamepad ()
+        status := $"Connected: {e.Gamepad.Id}"
 
-    // Event handler for gamepad disconnection
-    let handleGamepadDisconnected (_: Dom.Event) =
-        statusMessage.Value <- "Gamepad Disconnected"
-        gamepadIndex <- None
+    let handleGamepadDisconnected (event: Dom.Event) =
+        let e = As<GamepadEvent> event
+        if gamepadIndex = Some e.Gamepad.Index then
+            gamepadIndex <- None
+        status := "Disconnected. Connect a gamepad or use the keyboard."
 
-    // Fake gamepad controls using keyboard input
-    let mutable fakeGamepad =
-        {| Buttons = Array.init 16 (fun _ -> {| pressed = false |})
-           Axes = [| 0.0; 0.0 |] |}
-
-    let handleKeyDown (e: Dom.Event) =
-        let keyEvent = As<Dom.KeyboardEvent> e
-        match keyEvent.Key with
-        | "ArrowUp" -> fakeGamepad.Axes.[1] <- -1.0
-        | "ArrowDown" -> fakeGamepad.Axes.[1] <- 1.0
-        | "ArrowLeft" -> fakeGamepad.Axes.[0] <- -1.0
-        | "ArrowRight" -> fakeGamepad.Axes.[0] <- 1.0
-        | " " -> fakeGamepad.Buttons.[0]?pressed <- true
+    let handleKeyDown (event: Dom.Event) =
+        let key = As<Dom.KeyboardEvent> event
+        match key.Key with
+        | "ArrowUp" -> fakeAxes.[1] <- -1.0
+        | "ArrowDown" -> fakeAxes.[1] <- 1.0
+        | "ArrowLeft" -> fakeAxes.[0] <- -1.0
+        | "ArrowRight" -> fakeAxes.[0] <- 1.0
+        | " " -> fakeButtons.[0] <- true
         | _ -> ()
 
-    let handleKeyUp (e: Dom.Event) =
-        let keyEvent = As<Dom.KeyboardEvent> e
-        match keyEvent.Key with
-        | "ArrowUp" | "ArrowDown" -> fakeGamepad.Axes.[1] <- 0.0
-        | "ArrowLeft" | "ArrowRight" -> fakeGamepad.Axes.[0] <- 0.0
-        | " " -> fakeGamepad.Buttons.[0]?pressed <- false
+    let handleKeyUp (event: Dom.Event) =
+        let key = As<Dom.KeyboardEvent> event
+        match key.Key with
+        | "ArrowUp" | "ArrowDown" -> fakeAxes.[1] <- 0.0
+        | "ArrowLeft" | "ArrowRight" -> fakeAxes.[0] <- 0.0
+        | " " -> fakeButtons.[0] <- false
         | _ -> ()
-
-    // Function to update fake gamepad inputs using keyboard
-    let rec updateFakeGamepad () =
-        buttonPressed.Value <- if fakeGamepad.Buttons.[0]?pressed then "Button 0 (Spacebar)" else "None"
-        leftStickX.Value <- fakeGamepad.Axes.[0].ToString()
-        leftStickY.Value <- fakeGamepad.Axes.[1].ToString()
-        JS.RequestAnimationFrame(fun _ -> updateFakeGamepad ()) |> ignore
 
     [<SPAEntryPoint>]
     let Main () =
-        // Listen for gamepad connect and disconnect events
         JS.Window.AddEventListener("gamepadconnected", handleGamepadConnected)
         JS.Window.AddEventListener("gamepaddisconnected", handleGamepadDisconnected)
         JS.Window.AddEventListener("keydown", handleKeyDown)
         JS.Window.AddEventListener("keyup", handleKeyUp)
 
-        updateFakeGamepad ()
+        updateGamepad ()
 
-        IndexTemplate.Main()
-            .Status(statusMessage.V)
-            .Buttons(buttonPressed.V)
-            .LX(leftStickX.V)
-            .LY(leftStickY.V)
-            .Doc()
-        |> Doc.RunById "main"
+        IndexTemplate()
+            .status(status.V)
+            .buttons(buttons.V)
+            .leftX(leftX.V)
+            .leftY(leftY.V)
+            .triggerL(triggerL.V)
+            .triggerR(triggerR.V)
+            .Bind()

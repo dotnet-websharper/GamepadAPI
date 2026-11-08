@@ -1,172 +1,155 @@
-# WebSharper Gamepad API Binding
+# WebSharper.Gamepad
 
-This repository provides an F# [WebSharper](https://websharper.com/) binding for the [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API), enabling WebSharper applications to detect and interact with game controllers.
+[![NuGet](https://img.shields.io/badge/nuget-not%20published-lightgrey)](https://github.com/dotnet-websharper/GamepadAPI)
 
-## Repository Structure
+WebSharper bindings for the [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API) —
+detecting and reading game controllers from F# and C# web apps.
 
-The repository consists of two main projects:
+This repository contains:
 
-1. **Binding Project**:
+| Project | Purpose |
+| --- | --- |
+| `WebSharper.Gamepad` | The binding: WIG definitions for `Gamepad`, `GamepadButton`, `GamepadHapticActuator`, `GamepadPose`, `GamepadEvent`, and their option dictionaries. |
+| `WebSharper.Gamepad.Extensions` | `[<Inline>]` client extensions: `Navigator.GetGamepads()` and the `Window.OnGamepadConnected` / `OnGamepadDisconnected` handlers. |
+| `WebSharper.Gamepad.Sample` | An ASP.NET Core SPA that shows the live state of a connected gamepad. |
 
-   - Contains the F# WebSharper binding for the Gamepad API.
+## Live demos
 
-2. **Sample Project**:
-   - Demonstrates how to use the Gamepad API with WebSharper syntax.
-   - Includes a GitHub Pages demo: [View Demo](https://dotnet-websharper.github.io/GamepadAPI/).
+**Try it live:** [Open the sample in your browser](https://dotnet-websharper.github.io/GamepadAPI/)
+
+![Gamepad API sample](docs/sample.png)
+
+The sample doubles as the binding's test case: it polls the gamepad state on every animation frame and reacts to
+`gamepadconnected` / `gamepaddisconnected` events.
+
+- **Sample (this repository):** <https://dotnet-websharper.github.io/GamepadAPI/>
+- **Source repository:** <https://github.com/dotnet-websharper/GamepadAPI>
+- **WebSharper bindings:** <https://websharper.com/bindings>
+
+## Features
+
+- `Gamepad` (`id`, `index`, `mapping`, `connected`, `timestamp`, `axes`, `buttons`, `hand`, `pose`, `hapticActuators`, `vibrationActuator`).
+- `GamepadButton` (`pressed`, `touched`, `value`).
+- `GamepadHapticActuator` (`effects`, `playEffect`, `pulse`, `reset`) and `GamepadHapticEffectParams`.
+- `GamepadPose` (`hasOrientation`, `hasPosition`, `position`, `orientation`, `linearVelocity`, `angularVelocity`, and the accelerations).
+- `GamepadEvent` / `GamepadEventInit`.
+- `Navigator.getGamepads()` and the `gamepadconnected` / `gamepaddisconnected` events in the Extensions assembly.
 
 ## Installation
 
-To use this package in your WebSharper project, add the NuGet package:
+The binding is not currently published to NuGet. Reference the projects from source:
 
 ```bash
-   dotnet add package WebSharper.Gamepad
+git clone https://github.com/dotnet-websharper/GamepadAPI.git
 ```
 
-## Building
+```xml
+<ItemGroup>
+  <ProjectReference Include="path/to/WebSharper.Gamepad/WebSharper.Gamepad.fsproj" />
+  <ProjectReference Include="path/to/WebSharper.Gamepad.Extensions/WebSharper.Gamepad.Extensions.fsproj" />
+</ItemGroup>
+```
 
-### Prerequisites
-
-- [.NET SDK](https://dotnet.microsoft.com/download) installed on your machine.
-
-### Steps
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/dotnet-websharper/Gamepad.git
-   cd Gamepad
-   ```
-
-2. Build the Binding Project:
-
-   ```bash
-   dotnet build WebSharper.Gamepad/WebSharper.Gamepad.fsproj
-   ```
-
-3. Build and Run the Sample Project:
-
-   ```bash
-   cd WebSharper.Gamepad.Sample
-   dotnet build
-   dotnet run
-   ```
-
-4. Open the hosted demo to see the Sample project in action:
-   [https://dotnet-websharper.github.io/Gamepad/](https://dotnet-websharper.github.io/Gamepad/)
-
-## Example Usage
-
-Below is an example of how to use the Gamepad API in a WebSharper project:
+## Usage
 
 ```fsharp
-namespace WebSharper.Gamepad.Sample
+namespace WebSharper.Gamepad.Demo
 
 open WebSharper
 open WebSharper.JavaScript
-open WebSharper.UI
-open WebSharper.UI.Client
-open WebSharper.UI.Templating
 open WebSharper.Gamepad
 
 [<JavaScript>]
-module Client =
-    // The templates are loaded from the DOM, so you just can edit index.html
-    // and refresh your browser, no need to recompile unless you add or remove holes.
-    type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
+module Demo =
+    let mutable gamepadIndex : int option = None
 
-    let statusMessage = Var.Create "Connect a gamepad and press any button"
-    let buttonPressed = Var.Create "None"
-    let leftStickX = Var.Create "0"
-    let leftStickY = Var.Create "0"
-
-    let mutable gamepadIndex: int option = None
-
-    // Function to update gamepad inputs in real-time
-    let rec updateGamepad () =
-        match gamepadIndex with
-        | Some index ->
-            let gamepads = JS.Window.Navigator.GetGamepads()
-            let gamepad = gamepads.[index]
-
-            if not (isNull gamepad) then
-                // Detect which buttons are being pressed
-                let buttons =
-                    gamepad.Buttons
-                    |> Array.mapi (fun i button -> if button.Pressed then Some (sprintf "Button %d" i) else None)
-                    |> Array.choose id
-                    |> fun arr -> if arr.Length > 0 then String.concat ", " arr else "None"
-
-                buttonPressed.Value <- buttons
-                leftStickX.Value <- gamepad.Axes.[0].ToString()
-                leftStickY.Value <- gamepad.Axes.[1].ToString()
-
-                // Recursively call updateGamepad on each animation frame
-                JS.RequestAnimationFrame(fun _ -> updateGamepad()) |> ignore
-        | None -> ()
-
-    // Event handler for gamepad connection
-    let handleGamepadConnected (event: Dom.Event) =
+    let onConnected (event: Dom.Event) =
         let e = As<GamepadEvent> event
         gamepadIndex <- Some e.Gamepad.Index
-        statusMessage.Value <- $"Gamepad Connected: {e.Gamepad.Id}"
-        updateGamepad ()
+        Console.Log($"Connected: {e.Gamepad.Id}")
 
-    // Event handler for gamepad disconnection
-    let handleGamepadDisconnected (_: Dom.Event) =
-        statusMessage.Value <- "Gamepad Disconnected"
-        gamepadIndex <- None
-
-    // Fake gamepad controls using keyboard input
-    let mutable fakeGamepad =
-        {| Buttons = Array.init 16 (fun _ -> {| pressed = false |})
-           Axes = [| 0.0; 0.0 |] |}
-
-    let handleKeyDown (e: Dom.Event) =
-        let keyEvent = As<Dom.KeyboardEvent> e
-        match keyEvent.Key with
-        | "ArrowUp" -> fakeGamepad.Axes.[1] <- -1.0
-        | "ArrowDown" -> fakeGamepad.Axes.[1] <- 1.0
-        | "ArrowLeft" -> fakeGamepad.Axes.[0] <- -1.0
-        | "ArrowRight" -> fakeGamepad.Axes.[0] <- 1.0
-        | " " -> fakeGamepad.Buttons.[0]?pressed <- true
+    let poll () =
+        let pads = JS.Window.Navigator.GetGamepads()
+        match gamepadIndex with
+        | Some i when i < pads.Length && not (isNull pads.[i]) ->
+            let gp = pads.[i]
+            let pressed =
+                gp.Buttons
+                |> Array.mapi (fun i b -> if b.Pressed then Some (sprintf "Button %d" i) else None)
+                |> Array.choose id
+            Console.Log($"Pressed: {String.concat ", " pressed}; left stick: {gp.Axes.[0]}, {gp.Axes.[1]}")
         | _ -> ()
+        JS.RequestAnimationFrame(fun _ -> poll ()) |> ignore
 
-    let handleKeyUp (e: Dom.Event) =
-        let keyEvent = As<Dom.KeyboardEvent> e
-        match keyEvent.Key with
-        | "ArrowUp" | "ArrowDown" -> fakeGamepad.Axes.[1] <- 0.0
-        | "ArrowLeft" | "ArrowRight" -> fakeGamepad.Axes.[0] <- 0.0
-        | " " -> fakeGamepad.Buttons.[0]?pressed <- false
-        | _ -> ()
-
-    // Function to update fake gamepad inputs using keyboard
-    let rec updateFakeGamepad () =
-        buttonPressed.Value <- if fakeGamepad.Buttons.[0]?pressed then "Button 0 (Spacebar)" else "None"
-        leftStickX.Value <- fakeGamepad.Axes.[0].ToString()
-        leftStickY.Value <- fakeGamepad.Axes.[1].ToString()
-        JS.RequestAnimationFrame(fun _ -> updateFakeGamepad ()) |> ignore
-
-    [<SPAEntryPoint>]
-    let Main () =
-        // Listen for gamepad connect and disconnect events
-        JS.Window.AddEventListener("gamepadconnected", handleGamepadConnected)
-        JS.Window.AddEventListener("gamepaddisconnected", handleGamepadDisconnected)
-        JS.Window.AddEventListener("keydown", handleKeyDown)
-        JS.Window.AddEventListener("keyup", handleKeyUp)
-
-        updateFakeGamepad ()
-
-        IndexTemplate.Main()
-            .Status(statusMessage.V)
-            .Buttons(buttonPressed.V)
-            .LX(leftStickX.V)
-            .LY(leftStickY.V)
-            .Doc()
-        |> Doc.RunById "main"
+    JS.Window.AddEventListener("gamepadconnected", onConnected)
+    poll ()
 ```
 
-## Important Considerations
+The `GetGamepads()` and `OnGamepadConnected` / `OnGamepadDisconnected` extensions are declared in the Extensions
+assembly and hang off `JS.Window.Navigator` and `JS.Window`.
 
-- **Browser Support**: The Gamepad API is supported in most modern browsers, but some implementations may vary.
-- **Polling vs. Events**: Gamepad input is usually polled rather than event-driven, requiring regular updates.
-- **Security Restrictions**: Some browsers require user interaction before accessing gamepad data.
+## Running the sample
+
+Build the sample in Release and serve its static output:
+
+```bash
+dotnet build WebSharper.Gamepad.Sample/WebSharper.Gamepad.Sample.fsproj -c Release
+python3 -m http.server -d WebSharper.Gamepad.Sample/wwwroot 8099
+```
+
+Open <http://localhost:8099/>. Connect a gamepad and press a button to see the readout. Without a gamepad, the
+arrow keys and spacebar drive a simulated input.
+
+Alternatively, run the ASP.NET Core host:
+
+```bash
+dotnet run --project WebSharper.Gamepad.Sample
+```
+
+## Building from source
+
+### Prerequisites
+
+- [.NET SDK 10](https://dotnet.microsoft.com/download) or later.
+
+### Build
+
+```bash
+dotnet build WebSharper.Gamepad.sln -c Release
+```
+
+The binding projects target `netstandard2.0`; the sample targets `net10.0`.
+
+## Deployment
+
+Pushing to `main` triggers `.github/workflows/ghpages.yml`, which builds the sample in Release and publishes
+`WebSharper.Gamepad.Sample/wwwroot` to the `gh-pages` branch.
+
+## Repository layout
+
+```
+WebSharper.Gamepad/              # binding (WIG definitions)
+  Main.fs
+WebSharper.Gamepad.Extensions/   # [<Inline>] client extensions
+  Library.fs
+WebSharper.Gamepad.Sample/       # ASP.NET Core SPA demo
+  Client.fs
+  Startup.fs
+  wwwroot/
+    index.html
+    site.css
+.github/workflows/ghpages.yml    # build + deploy the sample to GitHub Pages
+```
+
+## Notes on the API
+
+- **Polling, not events:** browsers expose gamepad state through `navigator.getGamepads()`, which you read on
+  every animation frame. The `gamepadconnected` and `gamepaddisconnected` events only signal when a controller
+  appears or disappears.
+- **User gesture:** some browsers require a button press or a user gesture before exposing a gamepad.
+- **Secure context:** the Gamepad API is not restricted to secure contexts, but the sample runs on localhost.
+- **Haptics:** `playEffect`, `pulse`, and `reset` are experimental and may not be available on every controller.
+
+## License
+
+Apache 2.0 — see [LICENSE.md](LICENSE.md).
