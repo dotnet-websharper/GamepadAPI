@@ -1,0 +1,22 @@
+type file
+id WebSharper.Gamepad
+authors
+    IntelliFactory
+owners
+    IntelliFactory
+repositoryType git
+repositoryUrl https://github.com/dotnet-websharper/GamepadAPI/
+licenseUrl https://github.com/dotnet-websharper/GamepadAPI/blob/main/LICENSE.md
+iconUrl https://github.com/dotnet-websharper/core/raw/websharper50/tools/WebSharper.png
+projectUrl https://github.com/dotnet-websharper/GamepadAPI
+description
+    WebSharper bindings for Gamepad
+tags
+    Web JavaScript F# C#
+files
+    ../WebSharper.Gamepad.Extensions/bin/Release/netstandard2.0/WebSharper.Gamepad.Extensions.dll ==> lib/netstandard2.0
+    ../WebSharper.Gamepad.Extensions/bin/Release/netstandard2.0/WebSharper.Gamepad.Extensions.xml ==> lib/netstandard2.0
+    ../WebSharper.Gamepad/bin/Release/netstandard2.0/WebSharper.Gamepad.dll ==> lib/netstandard2.0
+    ../WebSharper.Gamepad/bin/Release/netstandard2.0/WebSharper.Gamepad.xml ==> lib/netstandard2.0
+dependencies
+        WebSharper ~> LOCKEDVERSION:[3]
