@@ -15,8 +15,10 @@ tags
     Web JavaScript F# C#
 files
     ../WebSharper.Gamepad.Extensions/bin/Release/netstandard2.0/WebSharper.Gamepad.Extensions.dll ==> lib/netstandard2.0
+    ../WebSharper.Gamepad.Extensions/bin/Release/netstandard2.0/WebSharper.Gamepad.Extensions.websharper ==> lib/netstandard2.0
     ../WebSharper.Gamepad.Extensions/bin/Release/netstandard2.0/WebSharper.Gamepad.Extensions.xml ==> lib/netstandard2.0
     ../WebSharper.Gamepad/bin/Release/netstandard2.0/WebSharper.Gamepad.dll ==> lib/netstandard2.0
+    ../WebSharper.Gamepad/bin/Release/netstandard2.0/WebSharper.Gamepad.websharper ==> lib/netstandard2.0
     ../WebSharper.Gamepad/bin/Release/netstandard2.0/WebSharper.Gamepad.xml ==> lib/netstandard2.0
 dependencies
         WebSharper ~> LOCKEDVERSION:[3]
